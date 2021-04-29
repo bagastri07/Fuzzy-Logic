@@ -103,18 +103,89 @@ def inference_rule(service_value_set, food_value_set):
 
     return inference_value_set
 
+#membership func mamdani
+def memb_suggested(x, max, a = 65, b = 80):
+    if x <= a:
+        return 0
+    if x > a and x < b:
+        temp = (x - a) / (b - a)
+        if temp < max:
+            return (x - a) / (b - a)
+        else:
+            return max
+    if x >= b:
+        return max
+
+def memb_considered(x, max, a = 40, b = 55, c = 70, d = 75):
+    if x <= a or x >= d:
+        return 0
+    if x > a and x < b:
+        return (x - a) / (b - a)
+    if x >= b and x <= c:
+        return max
+    if x > c and x <= d:
+        temp = -1 * (x - d) / (d - c)
+        if temp < max:
+            return temp
+        else:
+            return max
+
+def memb_unrecommended(x, max, a = 20, b = 50):
+    if x <= a:
+        return max
+    if x > a and x < b:
+        temp = (x - a) / (b - a)
+        if temp < max:
+            return temp
+        else:
+            return max
+    if x >= b:
+        return 0
+
 def defuzzification(inference_value_set):
-    CONSTANT_SUGGESTED = 100
-    CONSTANT_CONSIDERED = 70
-    CONTANT_UNRECOMMENDED = 40
+    random_set = [10, 25, 40, 45, 60, 75, 90, 95]
 
-    a = ((inference_value_set['unrecommended'] * CONTANT_UNRECOMMENDED) + (inference_value_set['considered'] * CONSTANT_CONSIDERED) + (inference_value_set['suggested'] * CONSTANT_SUGGESTED))
-    b = inference_value_set['unrecommended'] + inference_value_set['considered'] + inference_value_set['suggested']
+    defuz_set = {
+        'suggested': [],
+        'considered': [],
+        'unrecommended': []
+    }
+    for i in range(len(random_set)):
+        defuz_set['suggested'].append(memb_suggested(random_set[i], inference_value_set['suggested']))
+        defuz_set['considered'].append(memb_considered(random_set[i], inference_value_set['considered']))
+        defuz_set['unrecommended'].append(memb_unrecommended(random_set[i], inference_value_set['unrecommended']))
+    
+    final_defuz_set = []
+    for i in range(len(random_set)):
+        final_defuz_set.append(max(defuz_set['unrecommended'][i], defuz_set['considered'][i], defuz_set['suggested'][i]))
+    
+    upp = 0
+    for i in range(len(random_set)):
+        upp = (random_set[i]*final_defuz_set[i]) + upp
+    bott = 0
+    for i in range(len(random_set)):
+        bott = final_defuz_set[i] + bott
 
-    return a / b
+    return upp / bott
+   
 
-a = fuzzy_food(6)
-b = fuzzy_service(58)
-print(inference_rule(a, b))
+def main():
+    #import excel dataset
+    import_data = pd.read_excel('restoran.xlsx')
+    data = import_data.to_numpy().copy()
 
-print(defuzzification(inference_rule(a, b)))
+    # # print(data[i, 1])
+    # inference_set = []
+    # for i in range(len(data)):
+    #     inf_temp = inference_rule(fuzzy_service(data[i, 1]), fuzzy_food(data[i, 2]))
+    #     defuzzy_temp = defuzzification(inf_temp)
+    #     inference_set.append([defuzzy_temp, i])
+    #     # print(defuzzy_temp)
+    # inference_set.sort(reverse=True)
+    # print(inference_set)
+
+
+a = inference_rule(fuzzy_service(93), fuzzy_food(4))
+print(defuzzification(a))
+
+
