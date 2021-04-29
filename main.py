@@ -76,4 +76,45 @@ def fuzzy_food(food_value):
     }
     return service_set_value
 
-print(fuzzy_food(5))
+#Inference
+def inference_rule(service_value_set, food_value_set):
+    inference_value_set = {
+        'suggested': [],
+        'considered': [],
+        'unrecommended': []
+    }
+    #Using clipping technique, conjunction rule will get the minumum value
+    inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['high']))
+    inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['med']))
+    inference_value_set['considered'].append(min(service_value_set['high'], food_value_set['low']))
+
+    inference_value_set['suggested'].append(min(service_value_set['med'], food_value_set['high']))
+    inference_value_set['considered'].append(min(service_value_set['med'], food_value_set['med']))
+    inference_value_set['unrecommended'].append(min(service_value_set['med'], food_value_set['low']))
+
+    inference_value_set['considered'].append(min(service_value_set['low'], food_value_set['high']))
+    inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['med']))
+    inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['low']))
+
+    #Yse disjunction rule, get the max value for each fuzzy value
+    inference_value_set['suggested'] = max(inference_value_set['suggested'])
+    inference_value_set['considered'] = max(inference_value_set['considered'])
+    inference_value_set['unrecommended'] = max(inference_value_set['unrecommended'])
+
+    return inference_value_set
+
+def defuzzification(inference_value_set):
+    CONSTANT_SUGGESTED = 100
+    CONSTANT_CONSIDERED = 70
+    CONTANT_UNRECOMMENDED = 40
+
+    a = ((inference_value_set['unrecommended'] * CONTANT_UNRECOMMENDED) + (inference_value_set['considered'] * CONSTANT_CONSIDERED) + (inference_value_set['suggested'] * CONSTANT_SUGGESTED))
+    b = inference_value_set['unrecommended'] + inference_value_set['considered'] + inference_value_set['suggested']
+
+    return a / b
+
+a = fuzzy_food(6)
+b = fuzzy_service(58)
+print(inference_rule(a, b))
+
+print(defuzzification(inference_rule(a, b)))
