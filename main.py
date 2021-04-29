@@ -5,7 +5,7 @@ import copy
 
 
 #Membership function that use trapezoidal
-def memb_service_high(x, a = 80, b = 90):
+def memb_service_high(x, a = 80, b = 85):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -13,7 +13,7 @@ def memb_service_high(x, a = 80, b = 90):
     if x >= b:
         return 1
 
-def memb_service_med(x, a = 55, b = 70, c = 75, d = 85):
+def memb_service_med(x, a = 60, b = 65, c = 70, d = 85):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -23,7 +23,7 @@ def memb_service_med(x, a = 55, b = 70, c = 75, d = 85):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_service_low(x, a = 20, b = 65):
+def memb_service_low(x, a = 20, b = 66):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -39,7 +39,7 @@ def memb_food_high(x, a= 5, b = 9):
     if x >= b:
         return 1
 
-def memb_food_med(x, a = 3, b = 5, c = 6, d = 8.5):
+def memb_food_med(x, a = 3, b = 5, c = 6, d = 7):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -49,7 +49,7 @@ def memb_food_med(x, a = 3, b = 5, c = 6, d = 8.5):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_food_low(x, a = 3, b = 5.5):
+def memb_food_low(x, a = 3, b = 5):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -84,13 +84,13 @@ def inference_rule(service_value_set, food_value_set):
     #Using clipping technique, conjunction rule will get the minumum value
     inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['high']))
     inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['med']))
-    inference_value_set['considered'].append(min(service_value_set['high'], food_value_set['low']))
+    inference_value_set['unrecommended'].append(min(service_value_set['high'], food_value_set['low']))
 
     inference_value_set['suggested'].append(min(service_value_set['med'], food_value_set['high']))
     inference_value_set['considered'].append(min(service_value_set['med'], food_value_set['med']))
     inference_value_set['unrecommended'].append(min(service_value_set['med'], food_value_set['low']))
 
-    inference_value_set['considered'].append(min(service_value_set['low'], food_value_set['high']))
+    inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['high']))
     inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['med']))
     inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['low']))
 
@@ -174,7 +174,7 @@ def choose_best_ten(defuzzy_data, data_set):
     print(copy_data[0][1])
 
     best_ten = []
-    for i in range(10):
+    for _ in range(10):
         best_restourant = max(copy_defuzzy)
         best_restourant_id = best_restourant[1]
         best_ten.append([best_restourant_id, copy_data[best_restourant_id-1][1], copy_data[best_restourant_id-1][2], best_restourant[0]])
@@ -204,7 +204,8 @@ def main():
 
 main()
 
-# a = inference_rule(fuzzy_service(93), fuzzy_food(4))
-# print(defuzzification(a))
+a = inference_rule(fuzzy_service(74), fuzzy_food(9))
+print(a)
+print(defuzzification(a))
 
 
