@@ -1,13 +1,10 @@
 #Import libraries
 import pandas as pd
 import numpy as np
-
-#import excel dataset
-import_data = pd.read_excel('restoran.xlsx')
-data = import_data.to_numpy().copy()
+import copy
 
 #Membership function that use trapezoidal
-def memb_service_high(x, a = 65, b = 80):
+def memb_service_high(x, a = 72, b = 95):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -15,7 +12,7 @@ def memb_service_high(x, a = 65, b = 80):
     if x >= b:
         return 1
 
-def memb_service_med(x, a = 40, b = 55, c = 70, d = 75):
+def memb_service_med(x, a = 50, b = 60, c = 70, d = 85):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -25,7 +22,7 @@ def memb_service_med(x, a = 40, b = 55, c = 70, d = 75):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_service_low(x, a = 20, b = 50):
+def memb_service_low(x, a = 20, b = 59):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -33,7 +30,7 @@ def memb_service_low(x, a = 20, b = 50):
     if x >= b:
         return 0
 
-def memb_food_high(x, a= 5, b = 9):
+def memb_food_high(x, a= 7.5, b = 9.5):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -41,7 +38,7 @@ def memb_food_high(x, a= 5, b = 9):
     if x >= b:
         return 1
 
-def memb_food_med(x, a = 3, b = 5, c = 6, d = 8):
+def memb_food_med(x, a = 5, b = 6, c = 7, d = 8):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -51,7 +48,7 @@ def memb_food_med(x, a = 3, b = 5, c = 6, d = 8):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_food_low(x, a = 3, b = 5.5):
+def memb_food_low(x, a = 2, b = 6.5):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -85,10 +82,10 @@ def inference_rule(service_value_set, food_value_set):
     }
     #Using clipping technique, conjunction rule will get the minumum value
     inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['high']))
-    inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['med']))
+    inference_value_set['considered'].append(min(service_value_set['high'], food_value_set['med']))
     inference_value_set['considered'].append(min(service_value_set['high'], food_value_set['low']))
 
-    inference_value_set['suggested'].append(min(service_value_set['med'], food_value_set['high']))
+    inference_value_set['considered'].append(min(service_value_set['med'], food_value_set['high']))
     inference_value_set['considered'].append(min(service_value_set['med'], food_value_set['med']))
     inference_value_set['unrecommended'].append(min(service_value_set['med'], food_value_set['low']))
 
@@ -104,17 +101,48 @@ def inference_rule(service_value_set, food_value_set):
     return inference_value_set
 
 def defuzzification(inference_value_set):
-    CONSTANT_SUGGESTED = 100
-    CONSTANT_CONSIDERED = 70
-    CONTANT_UNRECOMMENDED = 40
+    CONST_SUGGESTED = 100
+    CONST_CONSIDERED = 70
+    CONTANT_UNRECOMMENDED = 30
 
-    a = ((inference_value_set['unrecommended'] * CONTANT_UNRECOMMENDED) + (inference_value_set['considered'] * CONSTANT_CONSIDERED) + (inference_value_set['suggested'] * CONSTANT_SUGGESTED))
+    a = ((inference_value_set['unrecommended'] * CONTANT_UNRECOMMENDED) + (inference_value_set['considered'] * CONST_CONSIDERED) + (inference_value_set['suggested'] * CONST_SUGGESTED))
     b = inference_value_set['unrecommended'] + inference_value_set['considered'] + inference_value_set['suggested']
-
+    
     return a / b
 
-a = fuzzy_food(6)
-b = fuzzy_service(58)
-print(inference_rule(a, b))
+def look_best_ten(inference_set):
+    copy_inference_set = copy.deepcopy(inference_set)
+    copy_inference_set.sort()
 
-print(defuzzification(inference_rule(a, b)))
+    best_1 = inference_set.index(copy_inference_set[-1])
+    best_2 = inference_set.index(copy_inference_set[-2])
+    best_3 = inference_set.index(copy_inference_set[-90])
+
+    print(copy_inference_set)
+
+    return [best_1, best_2, best_3]
+
+def main():
+    #import excel dataset
+    import_data = pd.read_excel('restoran.xlsx')
+    data = import_data.to_numpy().copy()
+
+    # print(data[i, 1])
+    inference_set = []
+    for i in range(len(data)):
+        inf_temp = inference_rule(fuzzy_service(data[i, 1]), fuzzy_food(data[i, 2]))
+        defuzzy_temp = defuzzification(inf_temp)
+        inference_set.append([defuzzy_temp, i])
+        # print(defuzzy_temp)
+    inference_set.sort(reverse=True)
+    print(inference_set)
+
+    
+        
+
+main()
+# a = fuzzy_food(6)
+# b = fuzzy_service(58)
+# print(inference_rule(a, b))
+
+# print(defuzzification(inference_rule(a, b)))
