@@ -1,13 +1,11 @@
 #Import libraries
 import pandas as pd
 import numpy as np
+import copy
 
-#import excel dataset
-import_data = pd.read_excel('restoran.xlsx')
-data = import_data.to_numpy().copy()
 
 #Membership function that use trapezoidal
-def memb_service_high(x, a = 65, b = 80):
+def memb_service_high(x, a = 80, b = 90):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -15,7 +13,7 @@ def memb_service_high(x, a = 65, b = 80):
     if x >= b:
         return 1
 
-def memb_service_med(x, a = 40, b = 55, c = 70, d = 75):
+def memb_service_med(x, a = 55, b = 70, c = 75, d = 85):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -25,7 +23,7 @@ def memb_service_med(x, a = 40, b = 55, c = 70, d = 75):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_service_low(x, a = 20, b = 50):
+def memb_service_low(x, a = 20, b = 65):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -41,7 +39,7 @@ def memb_food_high(x, a= 5, b = 9):
     if x >= b:
         return 1
 
-def memb_food_med(x, a = 3, b = 5, c = 6, d = 8):
+def memb_food_med(x, a = 3, b = 5, c = 6, d = 8.5):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -167,25 +165,46 @@ def defuzzification(inference_value_set):
         bott = final_defuz_set[i] + bott
 
     return upp / bott
+
+def choose_best_ten(defuzzy_data, data_set):
+    copy_defuzzy = copy.deepcopy(defuzzy_data)
+    copy_data = copy.deepcopy(data_set)
+    copy_data.tolist()
+
+    print(copy_data[0][1])
+
+    best_ten = []
+    for i in range(10):
+        best_restourant = max(copy_defuzzy)
+        best_restourant_id = best_restourant[1]
+        best_ten.append([best_restourant_id, copy_data[best_restourant_id-1][1], copy_data[best_restourant_id-1][2], best_restourant[0]])
+        copy_defuzzy.remove(best_restourant)
    
+    return np.array(best_ten)
 
 def main():
     #import excel dataset
     import_data = pd.read_excel('restoran.xlsx')
     data = import_data.to_numpy().copy()
 
-    # # print(data[i, 1])
-    # inference_set = []
-    # for i in range(len(data)):
-    #     inf_temp = inference_rule(fuzzy_service(data[i, 1]), fuzzy_food(data[i, 2]))
-    #     defuzzy_temp = defuzzification(inf_temp)
-    #     inference_set.append([defuzzy_temp, i])
-    #     # print(defuzzy_temp)
-    # inference_set.sort(reverse=True)
-    # print(inference_set)
+    # print(data[i, 1])
+    defuzzy_set = []
+    for i in range(len(data)):
+        inf_temp = inference_rule(fuzzy_service(data[i, 1]), fuzzy_food(data[i, 2]))
+        defuzzy_temp = defuzzification(inf_temp)
+        defuzzy_set.append([defuzzy_temp, i+1])
+    best_ten = choose_best_ten(defuzzy_set, data)
 
+    data_final = pd.DataFrame(best_ten, columns=['Id', 'Pelayanan', 'Makanan', 'DeFuzzy Score'])
+    print(data_final)
 
-a = inference_rule(fuzzy_service(93), fuzzy_food(4))
-print(defuzzification(a))
+    file_path = 'peringkat.xlsx'
+    
+    data_final.to_excel(file_path, index=False)
+
+main()
+
+# a = inference_rule(fuzzy_service(93), fuzzy_food(4))
+# print(defuzzification(a))
 
 
