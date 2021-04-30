@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import copy
+import operator
 
 
 #Membership function that use trapezoidal
@@ -84,13 +85,13 @@ def inference_rule(service_value_set, food_value_set):
     #Using clipping technique, conjunction rule will get the minumum value
     inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['high']))
     inference_value_set['suggested'].append(min(service_value_set['high'], food_value_set['med']))
-    inference_value_set['unrecommended'].append(min(service_value_set['high'], food_value_set['low']))
+    inference_value_set['considered'].append(min(service_value_set['high'], food_value_set['low']))
 
     inference_value_set['suggested'].append(min(service_value_set['med'], food_value_set['high']))
     inference_value_set['considered'].append(min(service_value_set['med'], food_value_set['med']))
     inference_value_set['unrecommended'].append(min(service_value_set['med'], food_value_set['low']))
 
-    inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['high']))
+    inference_value_set['considered'].append(min(service_value_set['low'], food_value_set['high']))
     inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['med']))
     inference_value_set['unrecommended'].append(min(service_value_set['low'], food_value_set['low']))
 
@@ -140,7 +141,9 @@ def memb_unrecommended(x, max, a = 20, b = 50):
     if x >= b:
         return 0
 
+#defuzzifacation with Mamdani rule
 def defuzzification(inference_value_set):
+    #initiate random set
     random_set = [10, 25, 40, 45, 60, 75, 90, 95]
 
     defuz_set = {
@@ -157,6 +160,7 @@ def defuzzification(inference_value_set):
     for i in range(len(random_set)):
         final_defuz_set.append(max(defuz_set['unrecommended'][i], defuz_set['considered'][i], defuz_set['suggested'][i]))
     
+    #calculate score with mamdani formula
     upp = 0
     for i in range(len(random_set)):
         upp = (random_set[i]*final_defuz_set[i]) + upp
@@ -166,6 +170,7 @@ def defuzzification(inference_value_set):
 
     return upp / bott
 
+#Choose the best ten
 def choose_best_ten(defuzzy_data, data_set):
     copy_defuzzy = copy.deepcopy(defuzzy_data)
     copy_data = copy.deepcopy(data_set)
@@ -179,6 +184,9 @@ def choose_best_ten(defuzzy_data, data_set):
         best_restourant_id = best_restourant[1]
         best_ten.append([best_restourant_id, copy_data[best_restourant_id-1][1], copy_data[best_restourant_id-1][2], best_restourant[0]])
         copy_defuzzy.remove(best_restourant)
+    
+    #for deal about same final score
+    best_ten.sort(key= operator.itemgetter(3, 1, 2), reverse=True)
    
     return np.array(best_ten)
 
@@ -187,15 +195,18 @@ def main():
     import_data = pd.read_excel('restoran.xlsx')
     data = import_data.to_numpy().copy()
 
-    # print(data[i, 1])
     defuzzy_set = []
     for i in range(len(data)):
         inf_temp = inference_rule(fuzzy_service(data[i, 1]), fuzzy_food(data[i, 2]))
         defuzzy_temp = defuzzification(inf_temp)
         defuzzy_set.append([defuzzy_temp, i+1])
+
     best_ten = choose_best_ten(defuzzy_set, data)
 
+    #Make peringkat.xlsx
     data_final = pd.DataFrame(best_ten, columns=['Id', 'Pelayanan', 'Makanan', 'DeFuzzy Score'])
+    #print the result to terminal
+    
     print(data_final)
 
     file_path = 'peringkat.xlsx'
@@ -204,8 +215,8 @@ def main():
 
 main()
 
-a = inference_rule(fuzzy_service(74), fuzzy_food(9))
-print(a)
-print(defuzzification(a))
+# a = inference_rule(fuzzy_service(74), fuzzy_food(9))
+# print(a)
+# print(defuzzification(a))
 
 
