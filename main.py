@@ -6,7 +6,7 @@ import operator
 
 
 #Membership function that use trapezoidal
-def memb_service_high(x, a = 80, b = 85):
+def memb_service_high(x, a = 78, b = 87):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -14,7 +14,7 @@ def memb_service_high(x, a = 80, b = 85):
     if x >= b:
         return 1
 
-def memb_service_med(x, a = 60, b = 65, c = 70, d = 85):
+def memb_service_med(x, a = 65, b = 77, c = 80, d = 85):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -24,7 +24,7 @@ def memb_service_med(x, a = 60, b = 65, c = 70, d = 85):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_service_low(x, a = 20, b = 66):
+def memb_service_low(x, a = 40, b = 78):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -32,7 +32,7 @@ def memb_service_low(x, a = 20, b = 66):
     if x >= b:
         return 0
 
-def memb_food_high(x, a= 5, b = 9):
+def memb_food_high(x, a= 5, b = 7.5):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -40,7 +40,7 @@ def memb_food_high(x, a= 5, b = 9):
     if x >= b:
         return 1
 
-def memb_food_med(x, a = 3, b = 5, c = 6, d = 7):
+def memb_food_med(x, a = 4, b = 5, c = 6, d = 7):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -103,7 +103,7 @@ def inference_rule(service_value_set, food_value_set):
     return inference_value_set
 
 #membership func mamdani
-def memb_suggested(x, max, a = 65, b = 80):
+def memb_suggested(x, max, a = 63, b = 85):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -115,7 +115,7 @@ def memb_suggested(x, max, a = 65, b = 80):
     if x >= b:
         return max
 
-def memb_considered(x, max, a = 40, b = 55, c = 70, d = 75):
+def memb_considered(x, max, a = 40, b = 55, c = 65, d = 80):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -129,7 +129,7 @@ def memb_considered(x, max, a = 40, b = 55, c = 70, d = 75):
         else:
             return max
 
-def memb_unrecommended(x, max, a = 20, b = 50):
+def memb_unrecommended(x, max, a = 40, b = 50):
     if x <= a:
         return max
     if x > a and x < b:
@@ -144,7 +144,7 @@ def memb_unrecommended(x, max, a = 20, b = 50):
 #defuzzifacation with Mamdani rule
 def defuzzification(inference_value_set):
     #initiate random set
-    random_set = [10, 25, 40, 45, 60, 75, 90, 95]
+    random_set = [7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98]
 
     defuz_set = {
         'suggested': [],
@@ -176,7 +176,6 @@ def choose_best_ten(defuzzy_data, data_set):
     copy_data = copy.deepcopy(data_set)
     copy_data.tolist()
 
-    print(copy_data[0][1])
 
     best_ten = []
     for _ in range(10):
