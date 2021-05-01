@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 import copy
 import operator
+import matplotlib.pyplot as plot
 
 
 #Membership function that use trapezoidal
-def memb_service_high(x, a = 78, b = 87):
+def memb_service_high(x, a = 74, b = 95):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -14,7 +15,7 @@ def memb_service_high(x, a = 78, b = 87):
     if x >= b:
         return 1
 
-def memb_service_med(x, a = 65, b = 77, c = 80, d = 85):
+def memb_service_med(x, a = 50, b =60, c = 65, d = 80):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -24,7 +25,7 @@ def memb_service_med(x, a = 65, b = 77, c = 80, d = 85):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_service_low(x, a = 40, b = 78):
+def memb_service_low(x, a = 30, b = 65):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -32,7 +33,7 @@ def memb_service_low(x, a = 40, b = 78):
     if x >= b:
         return 0
 
-def memb_food_high(x, a= 5, b = 7.5):
+def memb_food_high(x, a= 7, b = 9):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -40,7 +41,7 @@ def memb_food_high(x, a= 5, b = 7.5):
     if x >= b:
         return 1
 
-def memb_food_med(x, a = 4, b = 5, c = 6, d = 7):
+def memb_food_med(x, a = 4, b = 6, c = 8, d = 8.2):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -50,7 +51,7 @@ def memb_food_med(x, a = 4, b = 5, c = 6, d = 7):
     if x > c and x <= d:
         return -1 * (x - d) / (d - c)
 
-def memb_food_low(x, a = 3, b = 5):
+def memb_food_low(x, a = 3, b = 6.2):
     if x <= a:
         return 1
     if x > a and x < b:
@@ -103,7 +104,7 @@ def inference_rule(service_value_set, food_value_set):
     return inference_value_set
 
 #membership func mamdani
-def memb_suggested(x, max, a = 63, b = 85):
+def memb_suggested(x, max, a = 70, b = 90):
     if x <= a:
         return 0
     if x > a and x < b:
@@ -115,7 +116,7 @@ def memb_suggested(x, max, a = 63, b = 85):
     if x >= b:
         return max
 
-def memb_considered(x, max, a = 40, b = 55, c = 65, d = 80):
+def memb_considered(x, max, a = 50, b = 55, c = 65, d = 80):
     if x <= a or x >= d:
         return 0
     if x > a and x < b:
@@ -129,7 +130,7 @@ def memb_considered(x, max, a = 40, b = 55, c = 65, d = 80):
         else:
             return max
 
-def memb_unrecommended(x, max, a = 40, b = 50):
+def memb_unrecommended(x, max, a = 30, b = 60):
     if x <= a:
         return max
     if x > a and x < b:
@@ -203,9 +204,8 @@ def main():
     best_ten = choose_best_ten(defuzzy_set, data)
 
     #Make peringkat.xlsx
-    data_final = pd.DataFrame(best_ten, columns=['Id', 'Pelayanan', 'Makanan', 'DeFuzzy Score'])
+    data_final = pd.DataFrame(best_ten, columns=['Id', 'Service', 'Food', 'Mamdani Score'])
     #print the result to terminal
-    
     print(data_final)
 
     file_path = 'peringkat.xlsx'
@@ -213,9 +213,4 @@ def main():
     data_final.to_excel(file_path, index=False)
 
 main()
-
-# a = inference_rule(fuzzy_service(74), fuzzy_food(9))
-# print(a)
-# print(defuzzification(a))
-
 
